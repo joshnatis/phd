@@ -15,7 +15,7 @@ A half-baked Markdown to HTML parser, meant for blog posts.
 
 ## Usage
 * `./a.out input.md output.html`
-* `./inject`
+* `./inject output.html`
   * inserts header and closing tags into html file
   
 ## Dependencies
