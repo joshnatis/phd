@@ -19,10 +19,10 @@ A half-baked Markdown to HTML parser, great for blog posts.
 a `c++11` compiler, a shell, `make` -- you have these things.
 
 ## Current features
-* headers (h1 - h6)
-* emphasis (`**` for **bold**, `~~` for ~~strikethrough~~, `__` for *italic*)
+* Headers (\<h1> through \<h6>)
+* Emphasis (`**` for **bold**, `~~` for ~~strikethrough~~, `__` for *italic*)
   * Notice that the syntax for italics is different than traditional Markdown.
-* code blocks (automatic syntax highlighting if you link the `highlight.js` script)
+* Code blocks (automatic syntax highlighting if you link the `highlight.js` script)
 
 ## Missing features (for now)
 * Lists
