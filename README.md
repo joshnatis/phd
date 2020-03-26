@@ -42,3 +42,13 @@ a `c++11` compiler, a shell, `make` -- you have these things.
 
 ## Note From the Author
 I didn't use regex, so now I only have 99 problems instead of [2](https://blog.codinghorror.com/regular-expressions-now-you-have-two-problems/).
+
+## Pictures!
+I know you want em...
+
+![Markdown](https://user-images.githubusercontent.com/31445542/77647237-6ddad400-6f3c-11ea-94b8-65900b429386.png)
+
+---
+
+![HTML](https://user-images.githubusercontent.com/31445542/77647239-6ddad400-6f3c-11ea-8dff-2325aea2b5e4.png)
+
