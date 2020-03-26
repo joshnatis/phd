@@ -1,10 +1,8 @@
 #include <iostream>
 #include <string>
 #include <fstream>
-#include <regex>
 
 using namespace std;
-
 
 void handle_errors(int argc, char **argv);
 string parse(string md_line, ifstream &fin);
@@ -18,7 +16,6 @@ string replace(std::string subject, const std::string& search,
 //thank you https://stackoverflow.com/a/14678800
 void replace2(std::string &subject, const std::string& search, 
 	const std::string& replace);
-
 
 int main(int argc, char **argv)
 {
@@ -117,14 +114,14 @@ string replace(std::string subject, const std::string& search, const std::string
 	if(search == "")
 		return "";
 
-    size_t pos = 0;
-    while ((pos = subject.find(search, pos)) != std::string::npos)
-    {
+	size_t pos = 0;
+	while ((pos = subject.find(search, pos)) != std::string::npos)
+	{
 		subject.replace(pos, search.length(), replace);
 		pos += replace.length();
-    }
-
-    return subject;
+	}
+	
+	return subject;
 }
 
 //thank you https://stackoverflow.com/a/14678800
@@ -133,15 +130,13 @@ void replace2(std::string &subject, const std::string& search, const std::string
 	if(search == "")
 		return;
 
-    size_t pos = 0;
-    while ((pos = subject.find(search, pos)) != std::string::npos)
-    {
+	size_t pos = 0;
+	while ((pos = subject.find(search, pos)) != std::string::npos)
+	{
 		subject.replace(pos, search.length(), replace);
 		pos += replace.length();
-    }
+	}
 }
-
-
 
 void parse_emphases_to_html(string &md_line)
 {
@@ -189,7 +184,6 @@ void replace_emphases_helper(string &md_line, const string &md_symbol,
 		}
 	}
 }
-
 
 void handle_errors(int argc, char **argv)
 {
