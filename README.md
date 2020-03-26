@@ -8,6 +8,7 @@ A half-baked Markdown to HTML parser, great for blog posts.
 * `make`
 * `vim inject`
   * configure some of the variables in the script
+* Optional: install `highlight.js` from [their page](https://highlightjs.org/download/) for syntax highlighting in code blocks. If you choose not to install it, edit the `inject` script to reflect this.
 
 ## Usage
 * `./a.out input.md output.html`
@@ -15,7 +16,7 @@ A half-baked Markdown to HTML parser, great for blog posts.
   * inserts header and closing tags into html file
   
 ## Dependencies
-Nothing (well, I guess a c++11 compiler and a shell), but you should download [highlight.js](https://highlightjs.org/) so you can have syntax highlighting for your code blocks. If you choose not to, make sure to edit the `inject` script to remove any references to it.
+a `c++11` compiler, a shell, `make` -- you have these things.
 
 ## Current features
 * headers (h1 - h6)
@@ -35,9 +36,6 @@ Nothing (well, I guess a c++11 compiler and a shell), but you should download [h
 
 ## Missing features (forever)
 * Everything else (*wait... there's not much else*)
-
-## Syntax Highlighting
-Aaaa check out [highlight.js](https://highlightjs.org/)
 
 ## Note From the Author
 I didn't use regex, so now I only have 99 problems instead of [2](https://blog.codinghorror.com/regular-expressions-now-you-have-two-problems/).
