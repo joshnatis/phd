@@ -1,14 +1,17 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <sstream>
 
 using namespace std;
+
 
 void handle_errors(int argc, char **argv);
 string parse(string md_line, ifstream &fin);
 void parse_emphases_to_html(string &md_line);
 void replace_emphases_helper(string &md_line, const string &md_symbol, 
 	const string &open_html_tag, const string &close_html_tag);
+void parse_images_to_html(string &md_line);
 
 //thank you https://stackoverflow.com/a/14678800
 string replace(std::string subject, const std::string& search, 
@@ -16,6 +19,7 @@ string replace(std::string subject, const std::string& search,
 //thank you https://stackoverflow.com/a/14678800
 void replace2(std::string &subject, const std::string& search, 
 	const std::string& replace);
+
 
 int main(int argc, char **argv)
 {
@@ -40,13 +44,6 @@ int main(int argc, char **argv)
 	}
 }
 
-bool contains_emphasis_symbols(const string &str)
-{
-	return str.find("_") != std::string::npos || 
-		str.find("**") != std::string::npos ||
-		str.find("~~") != std::string::npos;
-}
-
 string parse(string md_line, ifstream &fin)
 {
 	string html_result = "";
@@ -66,8 +63,8 @@ string parse(string md_line, ifstream &fin)
 		}
 
 		//return right away cause headers don't need to be parsed further (no more styling)
-		return "<h" + std::to_string(hash_count) + ">" + 
-			md_line.substr(i) + "</h" + std::to_string(hash_count) + ">";
+		return "<h" + to_string(hash_count) + ">" + 
+			md_line.substr(i) + "</h" + to_string(hash_count) + ">";
 	}
 
 	else if(md_line.substr(0,3) == "```")
@@ -95,18 +92,145 @@ string parse(string md_line, ifstream &fin)
 		exit(1);
 	}
 
-
 	//bold, italics, and strikethrough
-	else if(contains_emphasis_symbols(md_line))
-	{
-		parse_emphases_to_html(md_line);
-	}
+	parse_emphases_to_html(md_line);
+
+	parse_images_to_html(md_line);
 
 	if(md_line != "")
 		html_result = "<p>" + md_line + "</p>";
 
 	return html_result;
 }
+
+void parse_emphases_to_html(string &md_line)
+{
+	replace_emphases_helper(md_line, "**", "<b>", "</b>");
+	replace_emphases_helper(md_line, "~~", "<s>", "</s>");
+	replace_emphases_helper(md_line, "__", "<i>", "</i>");
+}
+
+//parses markdown emphasis syntax into html, in place
+void replace_emphases_helper(string &md_line, const string &md_symbol, 
+	const string &open_html_tag, const string &close_html_tag)
+{
+	const int symbol_len = 2; //this only works for symbols of length 2
+
+	int open_index;
+	int close_index;
+
+	bool line_begins_with_symbol = md_line.substr(0, symbol_len) == md_symbol;
+
+	//while we find ** in the string
+	while(line_begins_with_symbol || ((open_index = md_line.find(md_symbol)) && open_index != -1))
+	{
+		//there is a **
+
+		//special case where ** are first 2 chars
+		if(line_begins_with_symbol)
+		{
+			open_index = 0;
+			//we dont want to enter the loop for this again
+			line_begins_with_symbol = false;
+		}
+
+		//search for end in the rest of the string (rest = indeces after start + 2)
+		close_index = md_line.find(md_symbol, open_index + symbol_len);
+
+		if(close_index != -1)
+		{
+			//there is a corresponding **
+
+			//replace both **'s with open and closed <b> tag
+			md_line.replace(open_index, symbol_len, open_html_tag);
+			md_line.replace(close_index + 1, symbol_len, close_html_tag);
+		}
+		else
+		{
+			//there's no end to the suffering (i.e. no closing **, so do nothing)
+			break;
+		}
+	}
+}
+
+//parses markdown image syntax into html, in place
+void parse_images_to_html(string &md_line)
+{
+	//syntax: ![alt](url_to_image)
+	//i've chosen to harcode strings and values as i think they're easier to read here
+
+	bool line_begins_with_symbol = md_line.substr(0, 2) == "![";
+
+	int open_bracket_index = 0;
+
+	while(line_begins_with_symbol || 
+		((open_bracket_index = md_line.find("![")) && open_bracket_index != -1))
+	{
+		//found an ![
+
+		//special case where ![ are first 2 chars
+		if(line_begins_with_symbol)
+		{
+			open_bracket_index = 0;
+			//we dont want to enter the loop for this again
+			line_begins_with_symbol = false;
+		}
+
+		//find first instance of ]( after [
+		int closed_bracket_index = md_line.find("](", open_bracket_index);
+
+		if(closed_bracket_index != -1)
+		{
+			//found ](
+
+			//replace ]( with \" src=\" (hence the 2, we're replacing 2 chars, "[(")
+			md_line.replace(closed_bracket_index, 2, "\" src=\"");
+			//replace ![ with <img alt=\" (hence the 2, we're replacing 2 chars, "[(")
+			md_line.replace(open_bracket_index, 2, "<img alt=\"");
+
+			//weird math making up for extra characters we just inserted (html tags longer than md tags)
+			//adjusted index = index - md length + html length
+			string open_alt_symbol = "<img alt=\"";
+			closed_bracket_index = closed_bracket_index - 2 + open_alt_symbol.length();
+
+			//find ) following the ](
+			int closed_paren_index = md_line.find(")", closed_bracket_index);
+
+			//replace ) with \"> (hence the 1, we're replacing 1 char)
+			md_line.replace(closed_paren_index, 1, "\">");
+
+			//FOR OPTIONAL WIDTH TAG
+			int open_pipe_index = md_line.find("|", closed_paren_index);
+
+			if(open_pipe_index != -1)
+			{
+				//found a |
+
+				int closed_pipe_index = md_line.find("|", open_pipe_index + 1);
+				if(closed_pipe_index != -1)
+				{
+					//found a closing |
+
+					//user specified width
+					string width = md_line.substr(open_pipe_index + 1, closed_pipe_index - open_pipe_index - 1);
+
+					//remove width metadata from content
+					md_line.erase(open_pipe_index, closed_pipe_index - open_pipe_index + 1);
+
+					//add width style element to html
+					int alt = md_line.find("alt", open_bracket_index);
+					md_line.insert(alt, "style=\"" + width + "\" ");
+				}
+			}
+		}
+	}
+}
+
+/* 
+==========
+HELPERS
+==========
+*/
 
 //thank you https://stackoverflow.com/a/14678800
 string replace(std::string subject, const std::string& search, const std::string& replace)
@@ -135,53 +259,6 @@ void replace2(std::string &subject, const std::string& search, const std::string
 	{
 		subject.replace(pos, search.length(), replace);
 		pos += replace.length();
-	}
-}
-
-void parse_emphases_to_html(string &md_line)
-{
-	replace_emphases_helper(md_line, "**", "<b>", "</b>");
-	replace_emphases_helper(md_line, "~~", "<s>", "</s>");
-	replace_emphases_helper(md_line, "__", "<i>", "</i>");
-}
-
-void replace_emphases_helper(string &md_line, const string &md_symbol, 
-	const string &open_html_tag, const string &close_html_tag)
-{
-	int open_index;
-	int close_index;
-
-	bool line_begins_with_symbol = md_line.substr(0, 2) == md_symbol;
-
-	//while we find ** in the string
-	while(line_begins_with_symbol || ((open_index = md_line.find(md_symbol)) && open_index != -1))
-	{
-		//there is a **
-
-		//special case where ** are first 2 chars
-		if(line_begins_with_symbol)
-		{
-			open_index = 0;
-			//we dont want to enter the loop for this again
-			line_begins_with_symbol = false;
-		}
-
-		//search for end in the rest of the string (rest = indeces after start + 2)
-		close_index = md_line.find(md_symbol, open_index + 2);
-
-		if(close_index != -1)
-		{
-			//there is a corresponding **
-
-			//replace both ** with open and closed <b> tag
-			md_line.replace(open_index, 2, open_html_tag);
-			md_line.replace(close_index + 1, 2, close_html_tag);
-		}
-		else
-		{
-			//there's no end to the suffering (i.e. no closing **, so do nothing)
-			break;
-		}
 	}
 }
 
