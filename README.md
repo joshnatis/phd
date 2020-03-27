@@ -22,14 +22,19 @@ A half-baked Markdown to HTML parser, meant for blog posts.
 a `c++11` compiler, a shell, `make` -- you have these things.
 
 ## Current features
-* Headers (\<h1> through \<h6>)
-* Emphasis (`**` for **bold**, `~~` for ~~strikethrough~~, `__` for *italic*)
-  * Notice that the syntax for italics is different than traditional Markdown.
-* Code blocks (automatic syntax highlighting if you link the `highlight.js` script)
+* Headers
+  * \<h1> through \<h6>
+* Emphasis
+  * `**` for **bold**, `~~` for ~~strikethrough~~, `__` for *italic*
+  * Notice that the syntax for italics is different from traditional Markdown.
+* Code blocks
+  * automatic syntax highlighting if you link the `highlight.js` script
+* Images
+  * `![alt](url)`
+  * `![alt](url)|inline css, e.g. width: 50%; height: 30%|`
 
 ## Missing features (for now)
 * Lists
-* Images
 * Links
 * Inline code
 * Blockquotes
