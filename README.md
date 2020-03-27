@@ -8,15 +8,13 @@ A half-baked Markdown to HTML parser, meant for blog posts.
 
 ## Install
 * `git clone https://github.com/joshnatis/phd`
+* `vim phd.cpp`
+  * configure some of the variables in the `config()` function right up top
 * `make`
-* `vim inject`
-  * configure some of the variables in the script
-* Optional: install `highlight.js` from [their page](https://highlightjs.org/download/) for syntax highlighting in code blocks. If you choose not to install it, edit the `inject` script to reflect this.
+* Optional: install `highlight.js` from [their page](https://highlightjs.org/download/) for syntax highlighting in code blocks. If you choose not to install it, make sure to set the `USING_HIGHLIGHT_JS` boolean to false in `phd.cpp`.
 
 ## Usage
-* `./a.out input.md output.html`
-* `./inject output.html`
-  * inserts header and closing tags into html file
+* `./phd input.md output.html`
   
 ## Dependencies
 a `c++11` compiler, a shell, `make` -- you have these things.
