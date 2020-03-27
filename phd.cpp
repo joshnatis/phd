@@ -1,10 +1,58 @@
 #include <iostream>
 #include <string>
 #include <fstream>
-#include <sstream>
 
 using namespace std;
 
+string config(string inputfn)
+{
+	//============ CONFIG ============
+
+	//==============================================================
+	//* title of your HTML document/blog post
+	//* (default: name of .md file)
+	const string TITLE = inputfn.substr(0, inputfn.length() - 3);
+	//==============================================================
+	//* path to the folder containing your images
+	//* (default: current folder)
+	const string PATH_TO_IMAGE_DIR = ".";
+	const string FAVICON = "favicon.ico";
+	//==============================================================
+	//* path to the folder containing your css
+	//* (default: current folder)
+	const string PATH_TO_STYLES_DIR = ".";
+	const string USR_STYLESHEET = "styles.css";
+	//==============================================================
+	//* enable if using highlight.js for syntax highlighting
+	const bool USING_HIGHLIGHT_JS = true;
+	//* path to folder with higlight.js paraphernalia 
+	const string PATH_TO_HIGHLIGHT_JS = "./highlight";
+	//* one of the styles from highlight.js, in the styles/ dir
+	const string SYNTAX_HIGHLIGHT_STYLE = "pojoaque.css";
+	//==============================================================
+
+	//============ \CONFIG ============
+
+	string header = "<!DOCTYPE html>\n";
+	header += "<html lang=\"en\">\n";
+	header += "<head>\n";
+	header += "\t<meta charset=\"utf-8\"/>\n";
+	header += "\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/>\n";
+	header += "\t<title>" + TITLE + "</title>\n";
+	header += "\t<link rel=\"stylesheet\" href=\"" + PATH_TO_STYLES_DIR + "/" + USR_STYLESHEET + "\">\n";
+	header += "\t<link rel=\"icon\" href=\"" + PATH_TO_IMAGE_DIR + "/" + FAVICON + "\">\n";
+
+	if(USING_HIGHLIGHT_JS)
+	{
+		header += "\t<link rel=\"stylesheet\" href=\"" + PATH_TO_HIGHLIGHT_JS + "/styles/" + SYNTAX_HIGHLIGHT_STYLE + "\">\n";
+		header += "\t<script src=\"" + PATH_TO_HIGHLIGHT_JS + "/highlight.pack.js\"></script>\n";
+		header += "\t<script>hljs.initHighlightingOnLoad();</script>\n";
+	}
+
+	header += "\t</head>\n<body>\n";
+
+	return header;
+}
 
 void handle_errors(int argc, char **argv);
 string parse(string md_line, ifstream &fin);
@@ -28,11 +76,16 @@ int main(int argc, char **argv)
 	string inputfn = argv[1];
 	string outputfn = argv[2];
 
+	const string HEADER = config(inputfn);
+	const string TAIL = "\n</body>\n</html>";
+
 	ifstream fin(inputfn);
 	if(fin.fail()) {std::cout << "Unable to read file.\n"; exit(1);}
 
 	ofstream fout(outputfn);
 	if(fout.fail()) {std::cout << "Unable to read file.\n"; exit(1);}
+
+	fout << HEADER << endl;
 
 	string html_line;
 	string md_line;
@@ -42,6 +95,8 @@ int main(int argc, char **argv)
 		fout << html_line << endl;
 		//cout << html_line << endl;
 	}
+
+	fout << TAIL << endl;
 }
 
 string parse(string md_line, ifstream &fin)
