@@ -125,6 +125,10 @@ string parse(string md_line, ifstream &fin)
 			md_line.substr(i) + "</h" + to_string(hash_count) + ">";
 	}
 
+	//page break
+	else if(md_line == "---")
+		return "<hr>";
+
 	//code blocks
 	else if(md_line.substr(0,3) == "```")
 	{
