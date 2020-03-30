@@ -30,10 +30,12 @@ a `c++11` compiler, a shell, `make` -- you have these things.
 * Images
   * `![alt](url)`
   * `![alt](url)|inline css, e.g. width: 50%; height: 30%|`
+* Links
+  * `[link text](https://url.com)`
+  * I haven't implemented other types of links yet, and I don't plan to besides perhaps those in the following styles:  `[https://url.com]`, `<url.com>`, and `https://url.com`.
 
 ## Missing features (for now)
 * Lists
-* Links
 * Inline code
 * Blockquotes
 * \<hr> (horizontal rule)
