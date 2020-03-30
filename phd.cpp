@@ -4,7 +4,9 @@
 
 using namespace std;
 
-string config(string inputfn)
+#define NOT_FOUND -1
+
+string config(const string &inputfn)
 {
 	//============ CONFIG ============
 
@@ -49,7 +51,7 @@ string config(string inputfn)
 		header += "\t<script>hljs.initHighlightingOnLoad();</script>\n";
 	}
 
-	header += "\t</head>\n<body>\n";
+	header += "</head>\n\n<body>\n";
 
 	return header;
 }
@@ -58,8 +60,9 @@ void handle_errors(int argc, char **argv);
 string parse(string md_line, ifstream &fin);
 void parse_emphases_to_html(string &md_line);
 void replace_emphases_helper(string &md_line, const string &md_symbol, 
-	const string &open_html_tag, const string &close_html_tag);
+	const string &open_html_tag, const string &closed_html_tag);
 void parse_images_to_html(string &md_line);
+void parse_urls_to_html(string &md_line);
 
 //thank you https://stackoverflow.com/a/14678800
 string replace(std::string subject, const std::string& search, 
@@ -122,6 +125,7 @@ string parse(string md_line, ifstream &fin)
 			md_line.substr(i) + "</h" + to_string(hash_count) + ">";
 	}
 
+	//code blocks
 	else if(md_line.substr(0,3) == "```")
 	{
 		string language = md_line.substr(3);
@@ -129,7 +133,7 @@ string parse(string md_line, ifstream &fin)
 		string line;
 		while(getline(fin, line))
 		{
-			if(line == "```")
+			if(line == "```") //closing backticks
 			{
 				html_result += "</code></pre>";
 				return html_result;
@@ -143,14 +147,20 @@ string parse(string md_line, ifstream &fin)
 			}
 		}
 
-		cout << "Invalid MD: Missing a closing code block! (```)\n";
+		cout << "Invalid Markdown: Missing a closing code block! (```)\n";
 		exit(1);
 	}
+
+	parse_images_to_html(md_line);
+
+	parse_urls_to_html(md_line);
 
 	//bold, italics, and strikethrough
 	parse_emphases_to_html(md_line);
 
-	parse_images_to_html(md_line);
+	//for inline code, use the <code> tag so it doesnt line break and also
+	//make class="inline-code" and make the css for that have gray bg
+
 
 	if(md_line != "")
 		html_result = "<p>" + md_line + "</p>";
@@ -177,7 +187,8 @@ void replace_emphases_helper(string &md_line, const string &md_symbol,
 	bool line_begins_with_symbol = md_line.substr(0, symbol_len) == md_symbol;
 
 	//while we find ** in the string
-	while(line_begins_with_symbol || ((open_index = md_line.find(md_symbol)) && open_index != -1))
+	while(line_begins_with_symbol 
+		|| ((open_index = md_line.find(md_symbol)) && open_index != NOT_FOUND))
 	{
 		//there is a **
 
@@ -189,10 +200,10 @@ void replace_emphases_helper(string &md_line, const string &md_symbol,
 			line_begins_with_symbol = false;
 		}
 
-		//search for end in the rest of the string (rest = indeces after start + 2)
+		//search for end in rest of the string (rest = indeces after start + 2)
 		close_index = md_line.find(md_symbol, open_index + symbol_len);
 
-		if(close_index != -1)
+		if(close_index != NOT_FOUND)
 		{
 			//there is a corresponding **
 
@@ -202,7 +213,7 @@ void replace_emphases_helper(string &md_line, const string &md_symbol,
 		}
 		else
 		{
-			//there's no end to the suffering (i.e. no closing **, so do nothing)
+			//there's no end to the suffering (i.e no closing **, so do nothing)
 			break;
 		}
 	}
@@ -219,7 +230,7 @@ void parse_images_to_html(string &md_line)
 	int open_bracket_index = 0;
 
 	while(line_begins_with_symbol || 
-		((open_bracket_index = md_line.find("![")) && open_bracket_index != -1))
+		((open_bracket_index = md_line.find("![")) && open_bracket_index != NOT_FOUND))
 	{
 		//found an ![
 
@@ -233,8 +244,10 @@ void parse_images_to_html(string &md_line)
 
 		//find first instance of ]( after [
 		int closed_bracket_index = md_line.find("](", open_bracket_index);
+		//find first instance of ) after ](
+		int closed_paren_index = md_line.find(")", closed_bracket_index);
 
-		if(closed_bracket_index != -1)
+		if(closed_bracket_index != NOT_FOUND && closed_paren_index != NOT_FOUND)
 		{
 			//found ](
 
@@ -243,9 +256,9 @@ void parse_images_to_html(string &md_line)
 			//replace ![ with <img alt=\" (hence the 2, we're replacing 2 chars, "[(")
 			md_line.replace(open_bracket_index, 2, "<img alt=\"");
 
-			//weird math making up for extra characters we just inserted (html tags longer than md tags)
+			//weird math making up for extra chars we just inserted (html tags longer than md tags)
 			//adjusted index = index - md length + html length
-			string open_alt_symbol = "<img alt=\"";
+			const string open_alt_symbol = "<img alt=\"";
 			closed_bracket_index = closed_bracket_index - 2 + open_alt_symbol.length();
 
 			//find ) following the ](
@@ -257,17 +270,18 @@ void parse_images_to_html(string &md_line)
 			//FOR OPTIONAL WIDTH TAG
 			int open_pipe_index = md_line.find("|", closed_paren_index);
 
-			if(open_pipe_index != -1)
+			if(open_pipe_index != NOT_FOUND)
 			{
 				//found a |
 
 				int closed_pipe_index = md_line.find("|", open_pipe_index + 1);
-				if(closed_pipe_index != -1)
+				if(closed_pipe_index != NOT_FOUND)
 				{
 					//found a closing |
 
 					//user specified width
-					string width = md_line.substr(open_pipe_index + 1, closed_pipe_index - open_pipe_index - 1);
+					string width = md_line.substr(open_pipe_index + 1, 
+						closed_pipe_index - open_pipe_index - 1);
 
 					//remove width metadata from content
 					md_line.erase(open_pipe_index, closed_pipe_index - open_pipe_index + 1);
@@ -278,6 +292,82 @@ void parse_images_to_html(string &md_line)
 				}
 			}
 		}
+		else return; //no bracket/paren, not a valid image
+	}
+}
+
+//parses markdown url syntax into html, in place
+void parse_urls_to_html(string &md_line)
+{
+	//syntax: [text](url)
+	//i've chosen to harcode strings and values as i think they're easier to read here
+
+	//most of the +1s and +2s are making up for index + length of symbols when getting text
+	//e.g. to get [mytext, the index points to [, so we add 1 to the substring to get mytext
+
+	bool line_begins_with_symbol = (md_line[0] == '[');
+
+	int open_bracket_index = 0;
+
+	while(line_begins_with_symbol || 
+		((open_bracket_index = md_line.find("[")) && open_bracket_index != NOT_FOUND))
+	{
+		//found an [
+
+		//special case where [ is first char
+		if(line_begins_with_symbol)
+		{
+			open_bracket_index = 0;
+			//we dont want to enter the loop for this again
+			line_begins_with_symbol = false;
+		}
+
+		//find first instance of ]( after [
+		int closed_bracket_index = md_line.find("](", open_bracket_index);
+		int closed_paren_index = md_line.find(")", closed_bracket_index);
+
+		if(closed_bracket_index != NOT_FOUND && closed_paren_index != NOT_FOUND)
+		{
+			//found ]( and )
+
+			//hyperlink text
+			string text = md_line.substr(open_bracket_index + 1, 
+				closed_bracket_index - open_bracket_index - 1);
+
+			string url = md_line.substr(closed_bracket_index + 2, 
+				closed_paren_index - closed_bracket_index - 2);
+
+			//replace ]( with </a> (hence the 2, we're replacing 2 chars, "[(")
+			md_line.replace(closed_bracket_index, 2, "\">");
+			//replace [ with <a href=\" (hence the 1, we're replacing 1 char, "[")
+			md_line.replace(open_bracket_index, 1, "<a href=\"");
+
+			//weird math making up for extra chars we just inserted (html tags longer than md tags)
+			//adjusted index = index - md length + html length
+			const string open_a_symbol = "<a href=\"";
+			closed_bracket_index = closed_bracket_index - 2 + open_a_symbol.length();
+
+			//find ) following the ](
+			closed_paren_index = md_line.find(")", closed_bracket_index);
+
+			//replace ) with \"> (hence the 1, we're replacing 1 char)
+			md_line.replace(closed_paren_index, 1, "</a>");
+
+			//now swap text and url (cause the order is opposite in md and html)
+
+			int text_pos = md_line.find(text, open_bracket_index);
+			//replace with single char first,
+			//cause if url length < text length, operation will leave behind part of text
+			md_line.replace(text_pos, text.length(), "_");
+			md_line.replace(text_pos, 1, url);
+
+			//search for url after [stuff inside of brackets](
+			//currently inside of brackets is url, so open brace + 1 + url length --> after
+			int url_pos = md_line.find(url, open_bracket_index + 1 + url.length());
+			md_line.replace(url_pos, url.length(), "_");
+			md_line.replace(url_pos, 1, text);
+		}
+		else return; //no paren/bracket, it's not a valid url
 	}
 }
 
