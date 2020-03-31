@@ -63,6 +63,7 @@ void replace_emphases_helper(string &md_line, const string &md_symbol,
 	const string &open_html_tag, const string &closed_html_tag);
 void parse_images_to_html(string &md_line);
 void parse_urls_to_html(string &md_line);
+void parse_inline_code_to_html(string &md_line);
 
 //thank you https://stackoverflow.com/a/14678800
 string replace(std::string subject, const std::string& search, 
@@ -155,6 +156,8 @@ string parse(string md_line, ifstream &fin)
 		exit(1);
 	}
 
+	parse_inline_code_to_html(md_line);
+
 	parse_images_to_html(md_line);
 
 	parse_urls_to_html(md_line);
@@ -218,7 +221,7 @@ void replace_emphases_helper(string &md_line, const string &md_symbol,
 		else
 		{
 			//there's no end to the suffering (i.e no closing **, so do nothing)
-			break;
+			return;
 		}
 	}
 }
@@ -271,7 +274,7 @@ void parse_images_to_html(string &md_line)
 			//replace ) with \"> (hence the 1, we're replacing 1 char)
 			md_line.replace(closed_paren_index, 1, "\">");
 
-			//FOR OPTIONAL WIDTH TAG
+			//FOR OPTIONAL INLINE CSS TAG
 			int open_pipe_index = md_line.find("|", closed_paren_index);
 
 			if(open_pipe_index != NOT_FOUND)
@@ -283,16 +286,16 @@ void parse_images_to_html(string &md_line)
 				{
 					//found a closing |
 
-					//user specified width
-					string width = md_line.substr(open_pipe_index + 1, 
+					//get user specified styles
+					string styles = md_line.substr(open_pipe_index + 1, 
 						closed_pipe_index - open_pipe_index - 1);
 
-					//remove width metadata from content
+					//remove styling metadata from content
 					md_line.erase(open_pipe_index, closed_pipe_index - open_pipe_index + 1);
 
-					//add width style element to html
+					//add styles to html
 					int alt = md_line.find("alt", open_bracket_index);
-					md_line.insert(alt, "style=\"" + width + "\" ");
+					md_line.insert(alt, "style=\"" + styles + "\" ");
 				}
 			}
 		}
@@ -306,7 +309,7 @@ void parse_urls_to_html(string &md_line)
 	//syntax: [text](url)
 	//i've chosen to harcode strings and values as i think they're easier to read here
 
-	//most of the +1s and +2s are making up for index + length of symbols when getting text
+	//most of the +1s and +2s are making up for index and length of symbols when getting text
 	//e.g. to get [mytext, the index points to [, so we add 1 to the substring to get mytext
 
 	bool line_begins_with_symbol = (md_line[0] == '[');
@@ -334,7 +337,7 @@ void parse_urls_to_html(string &md_line)
 		{
 			//found ]( and )
 
-			//hyperlink text
+			//hyperlink text (i.e. [the stuff in here](example.com))
 			string text = md_line.substr(open_bracket_index + 1, 
 				closed_bracket_index - open_bracket_index - 1);
 
@@ -360,7 +363,7 @@ void parse_urls_to_html(string &md_line)
 			//now swap text and url (cause the order is opposite in md and html)
 
 			int text_pos = md_line.find(text, open_bracket_index);
-			//replace with single char first,
+			//replace text with random single char first,
 			//cause if url length < text length, operation will leave behind part of text
 			md_line.replace(text_pos, text.length(), "_");
 			md_line.replace(text_pos, 1, url);
@@ -372,6 +375,40 @@ void parse_urls_to_html(string &md_line)
 			md_line.replace(url_pos, 1, text);
 		}
 		else return; //no paren/bracket, it's not a valid url
+	}
+}
+
+void parse_inline_code_to_html(string &md_line)
+{
+	//syntax: `this is all inline code`
+	//i've chosen to harcode strings and values as i think they're easier to read here
+
+	bool line_begins_with_symbol = (md_line[0] == '`');
+
+	int open_backtick_index = 0;
+
+	while(line_begins_with_symbol || 
+		((open_backtick_index = md_line.find("`")) && open_backtick_index != NOT_FOUND))
+	{
+		//found a `
+
+		//special case where ` is first char
+		if(line_begins_with_symbol)
+		{
+			open_backtick_index = 0;
+			//we dont want to enter the loop for this again
+			line_begins_with_symbol = false;
+		}
+
+		//find first instance of ` after `
+		int closed_backtick_index = md_line.find("`", open_backtick_index + 1);
+
+		if(closed_backtick_index != NOT_FOUND)
+		{
+			md_line.replace(closed_backtick_index, 1, "</code>");
+			md_line.replace(open_backtick_index, 1, "<code class=\"inline-code\">");
+		}
+		else return; //no closing backtick found
 	}
 }
 
