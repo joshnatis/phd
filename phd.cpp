@@ -57,7 +57,7 @@ string config(const string &inputfn)
 }
 
 void handle_errors(int argc, char **argv);
-string parse(string md_line, ifstream &fin);
+string parse(string md_line, ifstream &fin, int &consecutive_blank_lines, bool &unclosed_p_tag);
 void parse_emphases_to_html(string &md_line);
 void replace_emphases_helper(string &md_line, const string &md_symbol, 
 	const string &open_html_tag, const string &closed_html_tag);
@@ -69,7 +69,7 @@ void parse_inline_code_to_html(string &md_line);
 string replace(std::string subject, const std::string& search, 
 	const std::string& replace);
 //thank you https://stackoverflow.com/a/14678800
-void replace2(std::string &subject, const std::string& search, 
+void replace_in_place(std::string &subject, const std::string& search, 
 	const std::string& replace);
 
 
@@ -91,25 +91,45 @@ int main(int argc, char **argv)
 
 	fout << HEADER << endl;
 
+	int consecutive_blank_lines = 0;
+	bool unclosed_p_tag = false; //tracks state, if current line is inside unclosed <p>
+
 	string html_line;
 	string md_line;
 	while(getline(fin, md_line))
 	{
-		html_line = parse(md_line, fin);
-		fout << html_line << endl;
-		//cout << html_line << endl;
+		html_line = parse(md_line, fin, consecutive_blank_lines, unclosed_p_tag);
+		fout << html_line;
+
+		if(consecutive_blank_lines >= 1 || !unclosed_p_tag)
+			fout << endl;
 	}
 
-	fout << TAIL << endl;
+	if(unclosed_p_tag)
+		fout << "\n</p>" << endl;
+
+	fout << TAIL;
 }
 
-string parse(string md_line, ifstream &fin)
+string parse(string md_line, ifstream &fin, int &consecutive_blank_lines, bool &unclosed_p_tag)
 {
 	string html_result = "";
 
 	//headers, except where entire line is made up of #s
 	if(md_line[0] == '#' && replace(md_line, "#", "") != "")
 	{
+		//headers can have inline code too!
+		parse_inline_code_to_html(md_line);
+
+		//prefer header tags to be outside of <p> tags
+		if(unclosed_p_tag)
+		{
+			html_result = "</p>\n\n";
+			unclosed_p_tag = false;
+		}
+
+		consecutive_blank_lines = 0;
+
 		int hash_count = 0;
 		int i = 0;
 		char c = md_line[0];
@@ -121,20 +141,41 @@ string parse(string md_line, ifstream &fin)
 			c = md_line[i];
 		}
 
-		//return right away cause headers don't need to be parsed further (no more styling)
-		return "<h" + to_string(hash_count) + ">" + 
+		html_result += "<h" + to_string(hash_count) + ">" +
 			md_line.substr(i) + "</h" + to_string(hash_count) + ">";
+
+		//return right away cause headers don't need to be parsed further
+		return html_result;
 	}
 
-	//page break
+	//horizontal rule
 	else if(md_line == "---")
-		return "<hr>";
+	{
+		//<hr> tags can't be within <p> tags, so close any open <p>
+		if(unclosed_p_tag)
+		{
+			html_result = "</p>\n\n";
+			unclosed_p_tag = false;
+		}
+
+		consecutive_blank_lines = 0;
+		return html_result + "<hr>";
+	}
 
 	//code blocks
 	else if(md_line.substr(0,3) == "```")
 	{
+		//<pre> tags can't be within <p> tags, so close any open <p>
+		if(unclosed_p_tag)
+		{
+			html_result += "</p>\n\n";
+			unclosed_p_tag = false;
+		}
+
+		consecutive_blank_lines = 0;
+
 		string language = md_line.substr(3);
-		html_result = "<pre><code class=\"" + language + "\">";
+		html_result += "<pre><code class=\"" + language + "\">";
 		string line;
 		while(getline(fin, line))
 		{
@@ -145,9 +186,9 @@ string parse(string md_line, ifstream &fin)
 			}
 			else
 			{
-				replace2(line, "&", "&amp;");
-				replace2(line, "<", "&lt;");
-				replace2(line, ">", "&gt;");
+				replace_in_place(line, "&", "&amp;");
+				replace_in_place(line, "<", "&lt;");
+				replace_in_place(line, ">", "&gt;");
 				html_result += line + "\n";
 			}
 		}
@@ -159,18 +200,53 @@ string parse(string md_line, ifstream &fin)
 	parse_inline_code_to_html(md_line);
 
 	parse_images_to_html(md_line);
+	//cause <img> doesn't automatically add a newline
+	if(consecutive_blank_lines == 0 && md_line.find("<img") != NOT_FOUND)
+		md_line = "<br>" + md_line;
 
 	parse_urls_to_html(md_line);
 
 	//bold, italics, and strikethrough
 	parse_emphases_to_html(md_line);
 
-	//for inline code, use the <code> tag so it doesnt line break and also
-	//make class="inline-code" and make the css for that have gray bg
-
-
+	//consider making this a helper function
 	if(md_line != "")
-		html_result = "<p>" + md_line + "</p>";
+	{
+		if(consecutive_blank_lines >= 1)
+		{
+			//there's been a blank md line, so the content should have a new line
+
+			//this is achieved by either closing a <p> tag and starting a new one,
+			if(unclosed_p_tag)
+				html_result += "</p>\n\n<p>\n";
+
+			//or by simply opening a <p> tag if one isn't already open
+			else
+			{
+				html_result += "<p>\n";
+				unclosed_p_tag = true;
+			}
+
+			consecutive_blank_lines = 0;
+		}
+		else
+		{
+			//continue appending content to the page as usual
+
+			//"normal" text needs to be in some sort of tag, so place content in
+			//<p> tag if one isn't already open
+			if(!unclosed_p_tag)
+			{
+				html_result += "<p>\n";
+				unclosed_p_tag = true;
+			}
+		}
+
+		html_result += md_line;
+	}
+	else
+		consecutive_blank_lines++;
+
 
 	return html_result;
 }
@@ -405,6 +481,22 @@ void parse_inline_code_to_html(string &md_line)
 
 		if(closed_backtick_index != NOT_FOUND)
 		{
+			//remove any special characters from code blocks
+			for(int i = open_backtick_index + 1; i < closed_backtick_index; ++i)
+			{
+				if(md_line[i] == '<')
+				{
+					md_line.replace(i, 1, "&lt;");
+					closed_backtick_index += 3; //difference in length of symbols
+				}
+
+				else if(md_line[i] == '>')
+				{
+					md_line.replace(i, 1, "&gt;");
+					closed_backtick_index += 3; //difference in length of symbols
+				}
+			}
+
 			md_line.replace(closed_backtick_index, 1, "</code>");
 			md_line.replace(open_backtick_index, 1, "<code class=\"inline-code\">");
 		}
@@ -435,7 +527,7 @@ string replace(std::string subject, const std::string& search, const std::string
 }
 
 //thank you https://stackoverflow.com/a/14678800
-void replace2(std::string &subject, const std::string& search, const std::string& replace)
+void replace_in_place(std::string &subject, const std::string& search, const std::string& replace)
 {
 	if(search == "")
 		return;
