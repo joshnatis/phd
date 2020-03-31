@@ -27,8 +27,11 @@ a `c++11` compiler, a shell, `make` -- you have these things.
   * `**` for **bold**, `~~` for ~~strikethrough~~, `__` for *italic*
   * Notice that the syntax for italics is different from traditional Markdown.
 * Code blocks
-  * ``` `` `<optional language> ```
+  * ```` ```<optional language> <newline> ... <newline> ``` ````
   * automatic syntax highlighting if you link the `highlight.js` script
+* Inline code
+  * `` `This is inline code` ``
+  * This surrounds the inline code in `<code>` tags and with the class `inline-code`. You can add styles for `.inline-code` to change how it looks.
 * Images
   * `![alt](url)`
   * `![alt](url)|inline css, e.g. width: 50%; height: 30%|`
@@ -40,7 +43,6 @@ a `c++11` compiler, a shell, `make` -- you have these things.
 
 ## Missing features (for now)
 * Lists
-* Inline code
 * Blockquotes
 * \<br> (line breaks)
 * Inline HTML
