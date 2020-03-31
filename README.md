@@ -21,11 +21,13 @@ a `c++11` compiler, a shell, `make` -- you have these things.
 
 ## Current features
 * Headers
+  * `#`, `##`, `###`, ... `######`
   * \<h1> through \<h6>
 * Emphasis
   * `**` for **bold**, `~~` for ~~strikethrough~~, `__` for *italic*
   * Notice that the syntax for italics is different from traditional Markdown.
 * Code blocks
+  * ``` `` `<optional language> ```
   * automatic syntax highlighting if you link the `highlight.js` script
 * Images
   * `![alt](url)`
@@ -33,12 +35,13 @@ a `c++11` compiler, a shell, `make` -- you have these things.
 * Links
   * `[link text](https://url.com)`
   * I haven't implemented other types of links yet, and I don't plan to besides perhaps those in the following styles:  `[https://url.com]`, `<url.com>`, and `https://url.com`.
+* \<hr> (horizontal rule)
+  * `---`
 
 ## Missing features (for now)
 * Lists
 * Inline code
 * Blockquotes
-* \<hr> (horizontal rule)
 * \<br> (line breaks)
 * Inline HTML
 
