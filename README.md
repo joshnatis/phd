@@ -38,12 +38,13 @@ a `c++11` compiler, a shell, `make` -- you have these things.
   * `[link text](https://url.com)`
   * I haven't implemented other types of links yet, and I don't plan to besides perhaps those in the following styles:  `[https://url.com]`, `<url.com>`, and `https://url.com`.
 * \<hr> (horizontal rule)
-  * `---`
+    * `---`
+* Line breaks
+    * Blank lines in the `md` file will result in blank lines in the resulting content. Or, you can freely use `<br>` tags.
 
 ## Missing features (for now)
 * Lists
 * Blockquotes
-* \<br> (line breaks)
 * Inline HTML
 
 ## Missing features (forever)
