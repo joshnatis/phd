@@ -1,5 +1,5 @@
 # phd
-A half-baked Markdown to HTML parser, meant for blog posts.
+A simple Markdown to HTML parser, great for blog posts.
 
 <img src="https://user-images.githubusercontent.com/31445542/77646031-27847580-6f3a-11ea-8b5c-d5868bf4b6db.png" alt="euripides" title="A cute euripides" width="20%">
 
