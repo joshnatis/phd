@@ -1,5 +1,5 @@
 # phd
-A half-baked Markdown to HTML parser, meant for blog posts.
+A simple Markdown to HTML parser, great for blog posts.
 
 <img src="https://user-images.githubusercontent.com/31445542/77646031-27847580-6f3a-11ea-8b5c-d5868bf4b6db.png" alt="euripides" title="A cute euripides" width="20%">
 
@@ -10,7 +10,7 @@ A half-baked Markdown to HTML parser, meant for blog posts.
 * `git clone https://github.com/joshnatis/phd`
 * edit the variables in the `config()` function on top of `phd.cpp` to configure your settings
 * `make`
-* Optional: install `highlight.js` from [their page](https://highlightjs.org/download/) for syntax highlighting in code blocks. If you choose not to install it, make sure to set the `USING_HIGHLIGHT_JS` boolean to false in `phd.cpp`.
+* Optional: install `highlight.js` from [their page](https://highlightjs.org/download/) for syntax highlighting in code blocks. If you choose not to install it, make sure to set the `USING_HIGHLIGHT_JS` flag to false in `phd.cpp`.
 
 ## Usage
 * `./phd input.md output.html`
@@ -38,13 +38,17 @@ a `c++11` compiler, a shell, `make` -- you have these things.
   * `[link text](https://url.com)`
   * I haven't implemented other types of links yet, and I don't plan to besides perhaps those in the following styles:  `[https://url.com]`, `<url.com>`, and `https://url.com`.
 * \<hr> (horizontal rule)
-  * `---`
+    * `---`
+* Line breaks
+    * Blank lines mostly work the same as in Github-flavored Markdown. 
+    * You can freely use `<br>` tags
+* Blockquotes
+    * `> this is all a blockquote`
+    * Consecutive `>`'s with no blank lines between will all be funneled into a single blockquote
 
 ## Missing features (for now)
 * Lists
-* Blockquotes
-* \<br> (line breaks)
-* Inline HTML
+* Inline HTML (mostly works, but I haven't done any tests yet)
 
 ## Missing features (forever)
 * Everything else (*wait... there's not much else*)
