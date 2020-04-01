@@ -64,6 +64,8 @@ void replace_emphases_helper(string &md_line, const string &md_symbol,
 void parse_images_to_html(string &md_line);
 void parse_urls_to_html(string &md_line);
 void parse_inline_code_to_html(string &md_line);
+bool parse_blockquotes_to_html(string &md_line, bool inner_blockquote);
+
 
 //thank you https://stackoverflow.com/a/14678800
 string replace(std::string subject, const std::string& search, 
@@ -162,6 +164,14 @@ string parse(string md_line, ifstream &fin, int &consecutive_blank_lines, bool &
 		return html_result + "<hr>";
 	}
 
+	//if the line only consists of <br> tags, don't wrap it in <p> tags
+	else if(md_line.length() >= 4 && md_line.substr(0,4) == "<br>" && 
+		replace(md_line, "<br>", "") == "")
+	{
+		consecutive_blank_lines = 0;
+		return md_line;
+	}
+
 	//code blocks
 	else if(md_line.substr(0,3) == "```")
 	{
@@ -200,14 +210,57 @@ string parse(string md_line, ifstream &fin, int &consecutive_blank_lines, bool &
 	parse_inline_code_to_html(md_line);
 
 	parse_images_to_html(md_line);
-	//cause <img> doesn't automatically add a newline
-	if(consecutive_blank_lines == 0 && md_line.find("<img") != NOT_FOUND)
-		md_line = "<br>" + md_line;
 
 	parse_urls_to_html(md_line);
 
 	//bold, italics, and strikethrough
 	parse_emphases_to_html(md_line);
+
+	//blockquotes (purposely at the bottom cause they can contain markdown)
+	bool is_blockquote = parse_blockquotes_to_html(md_line, false);
+	if(is_blockquote)
+	{
+		//<blockquote> tags can't be within <p> tags, so close any open <p>
+		if(unclosed_p_tag)
+		{
+			html_result = "</p>\n\n";
+			unclosed_p_tag = false;
+		}
+		consecutive_blank_lines = 0;
+
+		html_result += md_line;
+
+		//consecutive >blockquotes should be in the same <blockquote> tag
+		//the following reads in any consecutive blockquotes into the tag
+
+		//save position of the line so we can rewind the file back once we read too far
+		streampos prev_line = fin.tellg();
+		while(getline(fin, md_line) && is_blockquote)
+		{
+			//blockquotes can contain markdown, so do the processing
+			parse_inline_code_to_html(md_line);
+			parse_images_to_html(md_line);
+			parse_urls_to_html(md_line);
+			parse_emphases_to_html(md_line);
+
+			is_blockquote = parse_blockquotes_to_html(md_line, true);
+
+			if(!is_blockquote)
+			{
+				//no more blockquotes, rewind file back 1 line so it can be parsed next time
+ 				fin.seekg(prev_line);
+			}
+			else
+			{
+				//this is another blockquote, simply append content to open <blockquote> tag
+				prev_line = fin.tellg();
+				html_result += md_line;
+			}
+		}
+
+		html_result += "</blockquote>";
+		return html_result;
+	}
 
 	//consider making this a helper function
 	if(md_line != "")
@@ -337,11 +390,11 @@ void parse_images_to_html(string &md_line)
 			//replace ]( with \" src=\" (hence the 2, we're replacing 2 chars, "[(")
 			md_line.replace(closed_bracket_index, 2, "\" src=\"");
 			//replace ![ with <img alt=\" (hence the 2, we're replacing 2 chars, "[(")
-			md_line.replace(open_bracket_index, 2, "<img alt=\"");
+			md_line.replace(open_bracket_index, 2, "<br><img alt=\"");
 
 			//weird math making up for extra chars we just inserted (html tags longer than md tags)
 			//adjusted index = index - md length + html length
-			const string open_alt_symbol = "<img alt=\"";
+			const string open_alt_symbol = "<br><img alt=\"";
 			closed_bracket_index = closed_bracket_index - 2 + open_alt_symbol.length();
 
 			//find ) following the ](
@@ -503,6 +556,21 @@ void parse_inline_code_to_html(string &md_line)
 		else return; //no closing backtick found
 	}
 }
+
+bool parse_blockquotes_to_html(string &md_line, bool inner_blockquote)
+{
+	if(md_line[0] == '>' && md_line.length() > 1)
+	{
+		if(!inner_blockquote)
+			md_line = "<blockquote>" + md_line.substr(1);
+		else
+			md_line = md_line.substr(1);
+
+		return true;
+	}
+	else return false;
+}
+
 
 /* 
 ==========
