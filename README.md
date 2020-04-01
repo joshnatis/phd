@@ -40,12 +40,15 @@ a `c++11` compiler, a shell, `make` -- you have these things.
 * \<hr> (horizontal rule)
     * `---`
 * Line breaks
-    * Blank lines in the `md` file will result in blank lines in the resulting content. Or, you can freely use `<br>` tags.
+    * Blank lines mostly work the same as in Github-flavored Markdown. 
+    * You can freely use `<br>` tags
+* Blockquotes
+    * `> this is all a blockquote`
+    * Consecutive `>`'s with no blank lines between will all be funneled into a single blockquote
 
 ## Missing features (for now)
 * Lists
-* Blockquotes
-* Inline HTML
+* Inline HTML (mostly works, but I haven't done any tests yet)
 
 ## Missing features (forever)
 * Everything else (*wait... there's not much else*)
