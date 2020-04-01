@@ -10,7 +10,7 @@ A half-baked Markdown to HTML parser, meant for blog posts.
 * `git clone https://github.com/joshnatis/phd`
 * edit the variables in the `config()` function on top of `phd.cpp` to configure your settings
 * `make`
-* Optional: install `highlight.js` from [their page](https://highlightjs.org/download/) for syntax highlighting in code blocks. If you choose not to install it, make sure to set the `USING_HIGHLIGHT_JS` boolean to false in `phd.cpp`.
+* Optional: install `highlight.js` from [their page](https://highlightjs.org/download/) for syntax highlighting in code blocks. If you choose not to install it, make sure to set the `USING_HIGHLIGHT_JS` flag to false in `phd.cpp`.
 
 ## Usage
 * `./phd input.md output.html`
