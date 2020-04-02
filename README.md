@@ -23,8 +23,7 @@ a `c++11` compiler, a shell, `make` -- you have these things.
   * `#`, `##`, `###`, ... `######`
   * \<h1> through \<h6>
 * Emphasis
-  * `**` for **bold**, `~~` for ~~strikethrough~~, `__` for *italic*
-  * Notice that the syntax for italics is different from traditional Markdown.
+  * `**` or `__` for **bold**, `~~` for ~~strikethrough~~, `*` or `_` for *italic*, and `==` for highlight
 * Code blocks
   * ```` ```<optional language> <newline> ... <newline> ``` ````
   * automatic syntax highlighting if you link the `highlight.js` script
