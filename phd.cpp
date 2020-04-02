@@ -262,15 +262,18 @@ string parse(string md_line, ifstream &fin, int &consecutive_blank_lines, bool &
 void parse_emphases_to_html_driver(string &md_line)
 {
 	parse_emphases_to_html(md_line, "**", "<b>", "</b>");
+	parse_emphases_to_html(md_line, "__", "<b>", "</b>");
 	parse_emphases_to_html(md_line, "~~", "<s>", "</s>");
-	parse_emphases_to_html(md_line, "__", "<i>", "</i>");
+	parse_emphases_to_html(md_line, "*", "<i>", "</i>");
+	parse_emphases_to_html(md_line, "_", "<i>", "</i>");
+	parse_emphases_to_html(md_line, "==", "<mark>", "</mark>");
 }
 
 //parses markdown emphasis syntax into html, in place
 void parse_emphases_to_html(string &md_line, const string &md_symbol, 
 	const string &open_html_tag, const string &close_html_tag)
 {
-	const int symbol_len = 2; //this only works for symbols of length 2
+	const int symbol_len = md_symbol.length();
 
 	int open_index;
 	int close_index;
@@ -299,8 +302,8 @@ void parse_emphases_to_html(string &md_line, const string &md_symbol,
 			//there is a corresponding **
 
 			//replace both **'s with open and closed <b> tag
+			md_line.replace(close_index, symbol_len, close_html_tag);
 			md_line.replace(open_index, symbol_len, open_html_tag);
-			md_line.replace(close_index + 1, symbol_len, close_html_tag);
 		}
 		else
 		{
