@@ -56,17 +56,23 @@ string config(const string &inputfn)
 	return header;
 }
 
-void handle_errors(int argc, char **argv);
+//parsing functions
 string parse(string md_line, ifstream &fin, int &consecutive_blank_lines, bool &unclosed_p_tag);
 void parse_emphases_to_html(string &md_line);
-void replace_emphases_helper(string &md_line, const string &md_symbol, 
-	const string &open_html_tag, const string &closed_html_tag);
 void parse_images_to_html(string &md_line);
 void parse_urls_to_html(string &md_line);
 void parse_inline_code_to_html(string &md_line);
 bool parse_blockquotes_to_html(string &md_line, bool inner_blockquote);
+void parse_list_to_html(const string &md_line, string &html_result);
 
-
+//helpers
+void handle_errors(int argc, char **argv);
+void replace_emphases_helper(string &md_line, const string &md_symbol, 
+	const string &open_html_tag, const string &closed_html_tag);
+bool is_ulist_character(const string& c);
+int count_indents(const string& md_line);
+void append_tabs(string &html_result, int curr_list_level);
+string remove_leading_whitespace(const string &md_line);
 //thank you https://stackoverflow.com/a/14678800
 string replace(std::string subject, const std::string& search, 
 	const std::string& replace);
@@ -117,41 +123,8 @@ string parse(string md_line, ifstream &fin, int &consecutive_blank_lines, bool &
 {
 	string html_result = "";
 
-	//headers, except where entire line is made up of #s
-	if(md_line[0] == '#' && replace(md_line, "#", "") != "")
-	{
-		//headers can have inline code too!
-		parse_inline_code_to_html(md_line);
-
-		//prefer header tags to be outside of <p> tags
-		if(unclosed_p_tag)
-		{
-			html_result = "</p>\n\n";
-			unclosed_p_tag = false;
-		}
-
-		consecutive_blank_lines = 0;
-
-		int hash_count = 0;
-		int i = 0;
-		char c = md_line[0];
-
-		while(c == '#' && hash_count < 6) //6 because of <h6>
-		{
-			++hash_count;
-			++i;
-			c = md_line[i];
-		}
-
-		html_result += "<h" + to_string(hash_count) + ">" +
-			md_line.substr(i) + "</h" + to_string(hash_count) + ">";
-
-		//return right away cause headers don't need to be parsed further
-		return html_result;
-	}
-
 	//horizontal rule
-	else if(md_line == "---")
+	if(md_line == "---")
 	{
 		//<hr> tags can't be within <p> tags, so close any open <p>
 		if(unclosed_p_tag)
@@ -215,6 +188,106 @@ string parse(string md_line, ifstream &fin, int &consecutive_blank_lines, bool &
 
 	//bold, italics, and strikethrough
 	parse_emphases_to_html(md_line);
+
+	//headers, except where entire line is made up of #'s
+	//purposely placed at bottom cause they can contain markdown
+	if(md_line[0] == '#' && replace(md_line, "#", "") != "")
+	{
+		//prefer header tags to be outside of <p> tags
+		if(unclosed_p_tag)
+		{
+			html_result = "</p>\n\n";
+			unclosed_p_tag = false;
+		}
+		consecutive_blank_lines = 0;
+
+		int hash_count = 0;
+		int i = 0;
+		char c = md_line[0];
+
+		while(c == '#' && hash_count < 6) //6 because of <h6>
+		{
+			++hash_count;
+			++i;
+			c = md_line[i];
+		}
+
+		html_result += "<h" + to_string(hash_count) + ">" +
+			md_line.substr(i) + "</h" + to_string(hash_count) + ">";
+
+		//return right away cause headers don't need to be parsed further
+		return html_result;
+	}
+
+	else if(md_line.length() >= 2 && is_ulist_character(md_line.substr(0, 2)))
+	{
+		//lists aren't phrasing content, close p tag
+		if(unclosed_p_tag)
+		{
+			html_result = "</p>\n\n";
+			unclosed_p_tag = false;
+		}
+		consecutive_blank_lines = 0;
+
+		//begin list and append first bullet
+		html_result += "<ul>\n";
+		string content = md_line.substr(2); //everything after "* "
+		html_result += "\t<li>" + content + "</li>\n";
+
+		int curr_list_level = 0;
+		int indents = 0;
+
+		streampos prev_line = fin.tellg();
+
+		//loop until md_line is no longer part of the list (doesn't start with "* " )
+		while(getline(fin, md_line))
+		{
+			string trimmed_md_line = remove_leading_whitespace(md_line);
+			if(md_line.length() >= 2 && is_ulist_character(trimmed_md_line.substr(0, 2)))
+			{
+				//line is still part of the list
+
+				prev_line = fin.tellg();
+
+				//create/close nested list depending on num indents in the line
+				indents = count_indents(md_line);
+
+				if(indents > curr_list_level)
+				{
+					append_tabs(html_result, curr_list_level + 1); //for html code indentation
+					html_result += "<ul>\n";
+					curr_list_level++;
+				}
+				else if(indents < curr_list_level)
+				{
+					append_tabs(html_result, curr_list_level + 1); //for html code indentation
+					html_result += "</ul>\n";
+					curr_list_level--;
+				}
+
+				append_tabs(html_result, curr_list_level + 1); //for html code indentation
+
+				content = trimmed_md_line.substr(2); //cut off "* "
+				html_result += "<li>" + content + "</li>\n";
+			}
+			else
+			{
+				fin.seekg(prev_line); //rewind file to parse this line again, not as a list
+				break;
+			}
+		}
+
+		//close all open <ul> tags
+		for(int i = 0; i < curr_list_level + 1; ++i)
+		{
+			for(int j = curr_list_level - i; j > 0; --j) //for html code indentation
+				html_result += "\t";
+
+			html_result += "</ul>\n";
+		}
+
+		return html_result;
+	}
 
 	//blockquotes (purposely at the bottom cause they can contain markdown)
 	bool is_blockquote = parse_blockquotes_to_html(md_line, false);
@@ -571,6 +644,14 @@ bool parse_blockquotes_to_html(string &md_line, bool inner_blockquote)
 	else return false;
 }
 
+// void parse_list_to_html(const string &md_line, string &html_result)
+// {
+// 	html_result += "<ul>\n";
+// 	string content = md_line.substr(2); //everything after "* "
+// 	html_result += "\t<li>" + content = "</li>\n";
+// }
+
+
 
 /* 
 ==========
@@ -605,6 +686,49 @@ void replace_in_place(std::string &subject, const std::string& search, const std
 	{
 		subject.replace(pos, search.length(), replace);
 		pos += replace.length();
+	}
+}
+
+bool is_ulist_character(const string& c)
+{
+	return c == "* " || c == "+ " || c == "- ";
+}
+
+int count_indents(const string& md_line)
+{
+	int spaces = 0;
+	int tabs = 0;
+
+	bool found_non_space = false;
+	int i = 0;
+	while(!found_non_space)
+	{
+		if(md_line[i] == ' ') spaces++;
+		else if(md_line[i] == '\t') tabs++;
+		else found_non_space = true;
+
+		++i;
+	}
+
+	//let's say every 2 spaces == 1 indent
+	int indents = (spaces / 2) + tabs;
+	return indents;
+}
+
+string remove_leading_whitespace(const string &md_line)
+{
+	int i = 0;
+	while(md_line[i] == ' ' || md_line[i] == '\t')
+		++i;
+
+	return md_line.substr(i);
+}
+
+void append_tabs(string &html_result, int curr_list_level)
+{
+	for(int i = 0; i < curr_list_level; ++i)
+	{
+		html_result += "\t";
 	}
 }
 
