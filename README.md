@@ -45,9 +45,11 @@ a `c++11` compiler, a shell, `make` -- you have these things.
 * Blockquotes
     * `> this is all a blockquote`
     * Consecutive `>`'s with no blank lines between will all be funneled into a single blockquote
+* Lists
+    * `* `, `+ `, or `- ` for bulleted lists, `1.` (or any number) for numbered lists
+    * To nest lists, include two spaces or a tab before your bullet point
 
 ## Missing features (for now)
-* Lists
 * Inline HTML (mostly works, but I haven't done any tests yet)
 
 ## Missing features (forever)
