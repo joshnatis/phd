@@ -22,7 +22,7 @@ a `c++11` compiler, a shell, `make` -- you have these things.
   * `#`, `##`, `###`, ... `######`
   * \<h1> through \<h6>
 * Emphasis
-  * `**` or `__` for **bold**, `~~` for ~~strikethrough~~, `*` or `_` for *italic*, and `==` for highlight
+  * `**` or `__` for **bold**, `~~` for ~~strikethrough~~, `*` or `_` for *italic*, `==` for highlight, `++` for underline
 * Code blocks
   * ```` ```<optional language> <newline> ... <newline> ``` ````
   * automatic syntax highlighting if you link the `highlight.js` script
@@ -49,6 +49,8 @@ a `c++11` compiler, a shell, `make` -- you have these things.
 
 ## Missing features (for now)
 * Inline HTML (mostly works, but I haven't done any tests yet)
+* Subscript/superscript
+* Alternate URL syntax
 
 ## Missing features (forever)
 * Everything else (*wait... there's not much else*)
