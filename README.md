@@ -5,7 +5,6 @@ A simple Markdown to HTML parser, great for blog posts.
 
 *No need for Medical Doctors when you have a Doctor of Philosophy on hand :P*
 
-
 ## Install
 * `git clone https://github.com/joshnatis/phd`
 * edit the variables in the `config()` function on top of `phd.cpp` to configure your settings
@@ -65,4 +64,3 @@ I know you want em...
 ---
 
 ![HTML](https://user-images.githubusercontent.com/31445542/77647239-6ddad400-6f3c-11ea-8dff-2325aea2b5e4.png)
-
