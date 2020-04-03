@@ -267,6 +267,7 @@ void parse_emphases_to_html_driver(string &md_line)
 	parse_emphases_to_html(md_line, "*", "<i>", "</i>");
 	parse_emphases_to_html(md_line, "_", "<i>", "</i>");
 	parse_emphases_to_html(md_line, "==", "<mark>", "</mark>");
+	parse_emphases_to_html(md_line, "++", "<ins>", "</ins>");
 }
 
 //parses markdown emphasis syntax into html, in place
