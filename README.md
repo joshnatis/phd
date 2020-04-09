@@ -48,9 +48,9 @@ a `c++11` compiler, a shell, `make` -- you have these things.
     * To nest lists, include two spaces or a tab before your bullet point
 
 ## Missing features (for now)
-* Inline HTML (mostly works, but I haven't done any tests yet)
 * Subscript/superscript
 * Alternate URL syntax
+* Inner/nested blockquotes
 
 ## Missing features (forever)
 * Everything else (*wait... there's not much else*)
