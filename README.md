@@ -22,7 +22,11 @@ a `c++11` compiler, a shell, `make` -- you have these things.
   * `#`, `##`, `###`, ... `######`
   * \<h1> through \<h6>
 * Emphasis
-  * `**` or `__` for **bold**, `~~` for ~~strikethrough~~, `*` or `_` for *italic*, `==` for highlight, `++` for underline
+  * `**string**` or `__string__` for **bold**
+  * `*string*` or `_string_` for *italic*
+  * `~~string~~` for ~~strikethrough~~
+  * `==string==` for <mark>highlight</mark>
+  * `++string++` for <u>underline</u>
 * Code blocks
   * ```` ```<optional language> <newline> ... <newline> ``` ````
   * automatic syntax highlighting if you link the `highlight.js` script
