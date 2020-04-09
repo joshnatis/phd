@@ -18,7 +18,7 @@ A simple Markdown to HTML parser, great for blog posts.
 a `c++11` compiler, a shell, `make` -- you have these things.
 
 ## Current features
-* Headers
+* Headings
   * `#`, `##`, `###`, ... `######`
   * \<h1> through \<h6>
 * Emphasis
