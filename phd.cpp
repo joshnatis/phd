@@ -276,6 +276,8 @@ void parse_emphases_to_html_driver(string &md_line)
 	parse_emphases_to_html(md_line, "_", "<i>", "</i>");
 	parse_emphases_to_html(md_line, "==", "<mark>", "</mark>");
 	parse_emphases_to_html(md_line, "++", "<ins>", "</ins>");
+	parse_emphases_to_html(md_line, "^", "<sup>", "</sup>");
+	parse_emphases_to_html(md_line, "~", "<sub>", "</sub>");
 }
 
 //parses markdown emphasis syntax into html, in place
@@ -742,14 +744,17 @@ void parse_escaped_characters(string &md_line)
 	int escape_pos;
 	while((escape_pos = md_line.find("\\")) && escape_pos != -1 && escape_pos != md_line.length() - 1)
 	{
-		if(md_line[escape_pos + 1] == '<')
-			md_line.replace(escape_pos, 2, "&lt;");
-
-		else if(md_line[escape_pos + 1] == '&')
-			md_line.replace(escape_pos, 2, "&amp;");
-
-		else if(md_line[escape_pos + 1] == '>')
-			md_line.replace(escape_pos, 2, "&gt;");
+		switch(md_line[escape_pos + 1])
+		{
+			case '<': md_line.replace(escape_pos, 2, "&lt;"); break;
+			case '&': md_line.replace(escape_pos, 2, "&amp;"); break;
+			case '>': md_line.replace(escape_pos, 2, "&gt;"); break;
+			case '*': md_line.replace(escape_pos, 2, "&#42;"); break;
+			case '_': md_line.replace(escape_pos, 2, "&#95;"); break;
+			case '`': md_line.replace(escape_pos, 2, "&#96;"); break;
+			case '^': md_line.replace(escape_pos, 2, "&#94;"); break;
+			case '~': md_line.replace(escape_pos, 2, "&#126;"); break;
+		}
 	}
 }
 
