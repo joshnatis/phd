@@ -82,7 +82,7 @@ void parse_urls_to_html(string &md_line);
 void parse_inline_code_to_html(string &md_line);
 bool parse_blockquotes_to_html(string &md_line, bool inner_blockquote);
 void parse_blockquotes_to_html(string &md_line, string &html_result, ifstream &fin);
-bool parse_headers_to_html(const string &md_line, string &html_result);
+bool parse_headings_to_html(const string &md_line, string &html_result);
 bool parse_codeblock_to_html(string &md_line, string &html_result, ifstream &fin);
 bool parse_list_to_html(string &md_line, string &html_result, ifstream &fin);
 
@@ -187,17 +187,22 @@ string parse(string md_line, ifstream &fin, int &consecutive_blank_lines, bool &
 	parse_inline_code_to_html(md_line);
 
 	parse_images_to_html(md_line);
+	if(consecutive_blank_lines == 0 && md_line.substr(0,4) == "<img")
+	{
+		//the img tag doesn't begin a new line, so add one
+		md_line = "\n<br>\n" + md_line;
+	}
 
 	parse_urls_to_html(md_line);
 
 	parse_emphases_to_html_driver(md_line); //bold, italics, and strikethrough
 
-	//headers, except where entire line is made up of #'s
-	//purposely placed at bottom cause headers can contain markdown
-	bool is_header = parse_headers_to_html(md_line, html_result);
-	if(is_header)
+	//headings, except where entire line is made up of #'s
+	//purposely placed at bottom cause headings can contain markdown
+	bool is_heading = parse_headings_to_html(md_line, html_result);
+	if(is_heading)
 	{
-		//prefer header tags to be outside of <p> tags
+		//prefer heading tags to be outside of <p> tags
 		close_open_p_tag(html_result, unclosed_p_tag, consecutive_blank_lines);
 		return html_result;
 	}
@@ -349,11 +354,11 @@ void parse_images_to_html(string &md_line)
 			//replace ]( with \" src=\" (hence the 2, we're replacing 2 chars, "[(")
 			md_line.replace(closed_bracket_index, 2, "\" src=\"");
 			//replace ![ with <img alt=\" (hence the 2, we're replacing 2 chars, "[(")
-			md_line.replace(open_bracket_index, 2, "<br><img alt=\"");
+			md_line.replace(open_bracket_index, 2, "<img alt=\"");
 
 			//weird math making up for extra chars we just inserted (html tags longer than md tags)
 			//adjusted index = index - md length + html length
-			const string open_alt_symbol = "<br><img alt=\"";
+			const string open_alt_symbol = "<img alt=\"";
 			closed_bracket_index = closed_bracket_index - 2 + open_alt_symbol.length();
 
 			//find ) following the ](
@@ -516,7 +521,7 @@ void parse_inline_code_to_html(string &md_line)
 	}
 }
 
-bool parse_headers_to_html(const string &md_line, string &html_result)
+bool parse_headings_to_html(const string &md_line, string &html_result)
 {
 	if(md_line[0] == '#' && replace(md_line, "#", "") != "")
 	{
