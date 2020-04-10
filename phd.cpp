@@ -85,6 +85,7 @@ void parse_blockquotes_to_html(string &md_line, string &html_result, ifstream &f
 bool parse_headings_to_html(const string &md_line, string &html_result);
 bool parse_codeblock_to_html(string &md_line, string &html_result, ifstream &fin);
 bool parse_list_to_html(string &md_line, string &html_result, ifstream &fin);
+void parse_escaped_characters(string &md_line);
 
 // === helpers ===
 void handle_errors(int argc, char **argv);
@@ -159,6 +160,8 @@ int main(int argc, char **argv)
 string parse(string md_line, ifstream &fin, int &consecutive_blank_lines, bool &unclosed_p_tag)
 {
 	string html_result = "";
+
+	parse_escaped_characters(md_line);
 
 	//horizontal rule
 	if(md_line == "---")
@@ -732,6 +735,22 @@ void parse_blockquotes_to_html(string &md_line, string &html_result, ifstream &f
 	}
 
 	html_result += "</blockquote>";
+}
+
+void parse_escaped_characters(string &md_line)
+{
+	int escape_pos;
+	while((escape_pos = md_line.find("\\")) && escape_pos != -1 && escape_pos != md_line.length() - 1)
+	{
+		if(md_line[escape_pos + 1] == '<')
+			md_line.replace(escape_pos, 2, "&lt;");
+
+		else if(md_line[escape_pos + 1] == '&')
+			md_line.replace(escape_pos, 2, "&amp;");
+
+		else if(md_line[escape_pos + 1] == '>')
+			md_line.replace(escape_pos, 2, "&gt;");
+	}
 }
 
 /*_    _ ______ _      _____  ______ _____   _____ 
