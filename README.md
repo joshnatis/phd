@@ -3,7 +3,8 @@ A simple Markdown to HTML parser, great for blog posts.
 
 <img src="https://user-images.githubusercontent.com/31445542/77646031-27847580-6f3a-11ea-8b5c-d5868bf4b6db.png" alt="euripides" title="A cute euripides" width="20%">
 
-*No need for Medical Doctors when you have a Doctor of Philosophy on hand :P*
+> No need for Medical Doctors when you have a Doctor of Philosophy on hand
+_- Gangsta Euripides_
 
 ## Install
 * `git clone https://github.com/joshnatis/phd`
@@ -22,11 +23,13 @@ a `c++11` compiler, a shell, `make` -- you have these things.
   * `#`, `##`, `###`, ... `######`
   * \<h1> through \<h6>
 * Emphasis
-  * `**string**` or `__string__` for **bold**
-  * `*string*` or `_string_` for *italic*
-  * `~~string~~` for ~~strikethrough~~
-  * `==string==` for <mark>highlight</mark>
-  * `++string++` for <u>underline</u>
+  * `**x**` or `__x__` for **bold**
+  * `*x*` or `_x_` for *italic*
+  * `~~x~~` for ~~strikethrough~~
+  * `==x==` for <mark>highlight</mark>
+  * `++x++` for <u>underline</u>
+  * `^x^` for superscript
+  * `~x~` for subscript
 * Code blocks
   * ```` ```[optional language] <newline> ... <newline> ``` ````
   * automatic syntax highlighting if you link the `highlight.js` script
@@ -51,12 +54,10 @@ a `c++11` compiler, a shell, `make` -- you have these things.
     * `* `, `+ `, or `- ` for bulleted lists, `1.` (or any number) for numbered lists
     * To nest lists, include two spaces or a tab before your bullet point
 * Escaped characters
-    * `\>`, `\&`, and `\>`
+    * `\>`, `\&`, `\>`, `\*`, `\_`, `\^`, `\~`, `` \` ``
 
 ## Missing features (for now)
-* Subscript/superscript
 * Alternate URL syntax
-* Inner/nested blockquotes
 
 ## Missing features (forever)
 * Everything else (*wait... there's not much else*)
