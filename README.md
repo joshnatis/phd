@@ -41,11 +41,10 @@ a `c++11` compiler, a shell, `make` -- you have these things.
   * `![alt](url)|inline css, e.g. width: 50%; height: 30%|`
 * Links
   * `[link text](https://url.com)`
-  * I haven't implemented other types of links yet, and I don't plan to besides perhaps those in the following styles:  `[https://url.com]`, `<url.com>`, and `https://url.com`.
 * \<hr> (horizontal rule)
     * `---`
 * Line breaks
-    * Blank lines mostly work the same as in Github-flavored Markdown. 
+    * One or more blank lines between content in the markdown will yield a blank line in the resultant html
     * You can freely use `<br>` tags
 * Blockquotes
     * `> this is all a blockquote`
@@ -58,6 +57,7 @@ a `c++11` compiler, a shell, `make` -- you have these things.
 
 ## Missing features (for now)
 * Alternate URL syntax
+  + `[https://url.com]`, `<url.com>`, and `https://url.com`.
 
 ## Missing features (forever)
 * Everything else (*wait... there's not much else*)
