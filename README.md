@@ -28,7 +28,7 @@ a `c++11` compiler, a shell, `make` -- you have these things.
   * `==string==` for <mark>highlight</mark>
   * `++string++` for <u>underline</u>
 * Code blocks
-  * ```` ```<optional language> <newline> ... <newline> ``` ````
+  * ```` ```[optional language] <newline> ... <newline> ``` ````
   * automatic syntax highlighting if you link the `highlight.js` script
 * Inline code
   * `` `This is inline code` ``
@@ -50,6 +50,8 @@ a `c++11` compiler, a shell, `make` -- you have these things.
 * Lists
     * `* `, `+ `, or `- ` for bulleted lists, `1.` (or any number) for numbered lists
     * To nest lists, include two spaces or a tab before your bullet point
+* Escaped characters
+    * `\>`, `\&`, and `\>`
 
 ## Missing features (for now)
 * Subscript/superscript
