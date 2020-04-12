@@ -58,6 +58,7 @@ a `c++11` compiler, a shell, `make` -- you have these things.
 ## Missing features (for now)
 * Alternate URL syntax
   + `[https://url.com]`, `<url.com>`, and `https://url.com`.
+* Nesting different types of lists together is buggy
 
 ## Missing features (forever)
 * Everything else (*wait... there's not much else*)
