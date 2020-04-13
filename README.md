@@ -53,7 +53,7 @@ a `c++11` compiler, a shell, `make` -- you have these things.
     * `* `, `+ `, or `- ` for bulleted lists, `1.` (or any number) for numbered lists
     * To nest lists, include two spaces or a tab before your bullet point
 * Escaped characters
-    * `\>`, `\&`, `\>`, `\*`, `\_`, `\^`, `\~`, `` \` ``
+    * `\>`, `\&`, `\<`, `\*`, `\_`, `\^`, `\~`, `` \` ``
 
 ## Missing features (for now)
 * Alternate URL syntax
