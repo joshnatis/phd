@@ -756,7 +756,7 @@ void parse_escaped_characters(string &md_line)
 			case '^': md_line.replace(escape_pos, 2, "&#94;"); break;
 			case '~': md_line.replace(escape_pos, 2, "&#126;"); break;
 			case '+': md_line.replace(escape_pos, 2, "&#43;"); break;
-			case '=': md_line.replace(escape_pos, 2, "&#61"); break;
+			case '=': md_line.replace(escape_pos, 2, "&#61;"); break;
 			case '!': md_line.replace(escape_pos, 2, "&#33;"); break;
 			case '[': md_line.replace(escape_pos, 2, "&#91;"); break;
 			case '\\': md_line.replace(escape_pos, 2, "&#47;"); break;
