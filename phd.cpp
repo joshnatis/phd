@@ -741,8 +741,9 @@ void parse_blockquotes_to_html(string &md_line, string &html_result, ifstream &f
 
 void parse_escaped_characters(string &md_line)
 {
-	int escape_pos;
-	while((escape_pos = md_line.find("\\")) && escape_pos != -1 && escape_pos != md_line.length() - 1)
+	int escape_pos = md_line.find("\\");
+
+	while(escape_pos != NOT_FOUND && escape_pos != md_line.length() - 1)
 	{
 		switch(md_line[escape_pos + 1])
 		{
@@ -754,7 +755,13 @@ void parse_escaped_characters(string &md_line)
 			case '`': md_line.replace(escape_pos, 2, "&#96;"); break;
 			case '^': md_line.replace(escape_pos, 2, "&#94;"); break;
 			case '~': md_line.replace(escape_pos, 2, "&#126;"); break;
+			case '+': md_line.replace(escape_pos, 2, "&#43;"); break;
+			case '=': md_line.replace(escape_pos, 2, "&#61"); break;
+			case '!': md_line.replace(escape_pos, 2, "&#33;"); break;
+			case '[': md_line.replace(escape_pos, 2, "&#91;"); break;
+			case '\\': md_line.replace(escape_pos, 2, "&#47;"); break;
 		}
+		escape_pos = md_line.find("\\", escape_pos + 1);
 	}
 }
 
