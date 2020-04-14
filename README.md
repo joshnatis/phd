@@ -76,3 +76,6 @@ I know you want em...
 ---
 
 ![HTML](https://user-images.githubusercontent.com/31445542/77647239-6ddad400-6f3c-11ea-8dff-2325aea2b5e4.png)
+
+---
+An example blog lives [here](https://josh8.com/blog).
