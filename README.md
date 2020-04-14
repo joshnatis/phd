@@ -60,6 +60,7 @@ a `c++11` compiler, a shell, `make` -- you have these things.
   + `[https://url.com]`, `<url.com>`, and `https://url.com`.
 * Nesting different types of lists together is buggy
 * Inline code gets parsed for tags (it should have no formatting)
+* \<a> tags get parsed for tags (vry bad, this ruins links)
 
 ## Missing features (forever)
 * Everything else (*wait... there's not much else*)
