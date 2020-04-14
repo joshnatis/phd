@@ -57,8 +57,9 @@ a `c++11` compiler, a shell, `make` -- you have these things.
 
 ## Missing features (for now)
 * Alternate URL syntax
-  + `[https://url.com]`, `<url.com>`, and `https://url.com`.
+  + `[https://url.com]`, `<url.com>`, and/or `https://url.com`.
 * Nesting different types of lists together is buggy
+* Nesting lists in general is buggy because I misunderstood how nesting lists in HTML works
 * Inline code gets parsed for tags (it should have no formatting)
 * \<a> tags get parsed for tags (vry bad, this ruins links)
 
