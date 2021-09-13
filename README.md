@@ -1,10 +1,21 @@
 # phd
-A simple Markdown to HTML parser, great for blog posts.
+A Markdown to HTML compiler
 
 <img src="https://user-images.githubusercontent.com/31445542/77646031-27847580-6f3a-11ea-8b5c-d5868bf4b6db.png" alt="euripides" title="A cute euripides" width="20%">
 
 > No need for Medical Doctors when you have a Doctor of Philosophy on hand
 _- Gangsta Euripides_
+
+## NOTE
+
+This tool is currently a Markdown to HTML converter and part of a static blog generator stuffed in one vehicle. I have been meaning to fix this for a long time but haven't gotten around to it just yet. Here are some TODOs:
+- write a (E)BNF grammar for the language I’m implementing (rather than an informal listing of features)
+- decouple the blog functionality from the Markdown parsing functionality
+  + corollary: allow Markdown parsing portion to be used as a header library
+- better error checking
+- tests
+- use less ad-hoc parsing techniques
+- become a UNIX filter program (accept from stdin, write to stdout)
 
 ## Install
 * `git clone https://github.com/joshnatis/phd`
@@ -16,7 +27,7 @@ _- Gangsta Euripides_
 * `./phd input.md output.html`
   
 ## Dependencies
-a `c++11` compiler, a shell, `make` -- you have these things.
+`c++11` and `make`
 
 ## Current features
 * Headings
