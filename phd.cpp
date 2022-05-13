@@ -6,63 +6,6 @@ using namespace std;
 
 #define NOT_FOUND -1
 
-
-/* _____ ____  _   _ ______ _____ _____ 
-  / ____/ __ \| \ | |  ____|_   _/ ____|
- | |   | |  | |  \| | |__    | || |  __ 
- | |   | |  | | . ` |  __|   | || | |_ |
- | |___| |__| | |\  | |     _| || |__| |
-  \_____\____/|_| \_|_|    |_____\_____|*/
-
-string config(const string &inputfn)
-{
-	//==============================================================
-	//* title of your HTML document/blog post
-	//* (default: name of .md file)
-	const string TITLE = inputfn.substr(0, inputfn.length() - 3);
-	//==============================================================
-	//* path to the folder containing your images
-	//* (default: current folder)
-	const string PATH_TO_IMAGE_DIR = ".";
-	const string FAVICON = "favicon.ico";
-	//==============================================================
-	//* path to the folder containing your css
-	//* (default: current folder)
-	const string PATH_TO_STYLES_DIR = ".";
-	const string USR_STYLESHEET = "styles.css";
-	//==============================================================
-	//* enable if using highlight.js for syntax highlighting
-	const bool USING_HIGHLIGHT_JS = true;
-	//* path to folder with higlight.js paraphernalia 
-	const string PATH_TO_HIGHLIGHT_JS = "./highlight";
-	//* one of the styles from highlight.js, in the styles/ dir
-	const string SYNTAX_HIGHLIGHT_STYLE = "pojoaque.css";
-	//==============================================================
-
-	// DON'T EDIT PAST THIS LINE :)
-
-	string header = "<!DOCTYPE html>\n";
-	header += "<html lang=\"en\">\n";
-	header += "<head>\n";
-	header += "\t<meta charset=\"utf-8\"/>\n";
-	header += "\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/>\n";
-	header += "\t<title>" + TITLE + "</title>\n";
-	header += "\t<link rel=\"stylesheet\" href=\"" + PATH_TO_STYLES_DIR + "/" + USR_STYLESHEET + "\">\n";
-	header += "\t<link rel=\"icon\" href=\"" + PATH_TO_IMAGE_DIR + "/" + FAVICON + "\">\n";
-
-	if(USING_HIGHLIGHT_JS)
-	{
-		header += "\t<link rel=\"stylesheet\" href=\"" + PATH_TO_HIGHLIGHT_JS + "/styles/" + SYNTAX_HIGHLIGHT_STYLE + "\">\n";
-		header += "\t<script src=\"" + PATH_TO_HIGHLIGHT_JS + "/highlight.pack.js\"></script>\n";
-		header += "\t<script>hljs.initHighlightingOnLoad();</script>\n";
-	}
-
-	header += "</head>\n\n<body>\n";
-
-	return header;
-}
-
-
 /*_____  _____   ____ _______ ____ _________     _______  ______  _____ 
  |  __ \|  __ \ / __ \__   __/ __ \__   __\ \   / /  __ \|  ____|/ ____|
  | |__) | |__) | |  | | | | | |  | | | |   \ \_/ /| |__) | |__  | (___  
@@ -71,7 +14,7 @@ string config(const string &inputfn)
  |_|    |_|  \_\\____/  |_|  \____/  |_|     |_|  |_|    |______|_____/ */
 
 //main parsing function (calls others)
-string parse(string md_line, ifstream &fin, int &consecutive_blank_lines, bool &unclosed_p_tag);
+string parse(string md_line, int &consecutive_blank_lines, bool &unclosed_p_tag);
 
 // === assorted parsing functions ===
 void parse_emphases_to_html_driver(string &md_line);
@@ -81,10 +24,10 @@ void parse_images_to_html(string &md_line);
 void parse_urls_to_html(string &md_line);
 void parse_inline_code_to_html(string &md_line);
 bool parse_blockquotes_to_html(string &md_line, bool inner_blockquote);
-void parse_blockquotes_to_html(string &md_line, string &html_result, ifstream &fin);
+void parse_blockquotes_to_html(string &md_line, string &html_result);
 bool parse_headings_to_html(const string &md_line, string &html_result);
-bool parse_codeblock_to_html(string &md_line, string &html_result, ifstream &fin);
-bool parse_list_to_html(string &md_line, string &html_result, ifstream &fin);
+bool parse_codeblock_to_html(string &md_line, string &html_result);
+bool parse_list_to_html(string &md_line, string &html_result);
 void parse_escaped_characters(string &md_line);
 
 // === helpers ===
@@ -113,40 +56,40 @@ void replace_in_place(std::string &subject, const std::string& search,
 
 int main(int argc, char **argv)
 {
-	handle_errors(argc, argv);
+	if(argc > 2)
+	{
+		cout << "Usage: phd [input]" << endl;
+		exit(1);
+	}
 
-	string inputfn = argv[1];
-	string outputfn = argv[2];
-
-	const string HEADER = config(inputfn);
-	const string TAIL = "\n</body>\n</html>";
-
-	ifstream fin(inputfn);
-	if(fin.fail()) {std::cout << "Unable to read file.\n"; exit(1);}
-
-	ofstream fout(outputfn);
-	if(fout.fail()) {std::cout << "Unable to read file.\n"; exit(1);}
-
-	fout << HEADER << endl;
+	ifstream fin;
+	if(argc == 2)
+	{
+		fin.open(argv[1]);
+		if(fin.fail())
+		{
+			cout << "Unable to read file " << argv[1] << endl;;
+			return 1;
+		}
+		cin.rdbuf(fin.rdbuf());
+	}
 
 	int consecutive_blank_lines = 0;
 	bool unclosed_p_tag = false; //tracks state, if current line is inside unclosed <p>
 
 	string html_line;
 	string md_line;
-	while(getline(fin, md_line))
+	while(getline(cin, md_line))
 	{
-		html_line = parse(md_line, fin, consecutive_blank_lines, unclosed_p_tag);
-		fout << html_line;
+		html_line = parse(md_line, consecutive_blank_lines, unclosed_p_tag);
+		cout << html_line;
 
 		if(consecutive_blank_lines >= 1 || !unclosed_p_tag)
-			fout << endl;
+			cout << endl;
 	}
 
 	if(unclosed_p_tag)
-		fout << "\n</p>" << endl;
-
-	fout << TAIL;
+		cout << "\n</p>" << endl;
 }
 
 
@@ -157,7 +100,7 @@ int main(int argc, char **argv)
  | |  / ____ \| | \ \ ____) |_| |_| |\  | |__| |
  |_| /_/    \_\_|  \_\_____/|_____|_| \_|\_____|*/
 
-string parse(string md_line, ifstream &fin, int &consecutive_blank_lines, bool &unclosed_p_tag)
+string parse(string md_line, int &consecutive_blank_lines, bool &unclosed_p_tag)
 {
 	string html_result = "";
 
@@ -179,7 +122,7 @@ string parse(string md_line, ifstream &fin, int &consecutive_blank_lines, bool &
 		return md_line;
 	}
 
-	bool is_codeblock = parse_codeblock_to_html(md_line, html_result, fin);
+	bool is_codeblock = parse_codeblock_to_html(md_line, html_result);
 	if(is_codeblock)
 	{
 		//<pre> tags can't be within <p> tags, so close any open <p>
@@ -210,7 +153,7 @@ string parse(string md_line, ifstream &fin, int &consecutive_blank_lines, bool &
 		return html_result;
 	}
 
-	bool is_list = parse_list_to_html(md_line, html_result, fin);
+	bool is_list = parse_list_to_html(md_line, html_result);
 	if(is_list)
 	{
 		//lists aren't phrasing content, close p tag
@@ -224,7 +167,7 @@ string parse(string md_line, ifstream &fin, int &consecutive_blank_lines, bool &
 	{
 		//<blockquote> tags can't be within <p> tags, so close any open <p>
 		close_open_p_tag(html_result, unclosed_p_tag, consecutive_blank_lines);
-		parse_blockquotes_to_html(md_line, html_result, fin);
+		parse_blockquotes_to_html(md_line, html_result);
 		return html_result;
 	}
 
@@ -256,6 +199,9 @@ string parse(string md_line, ifstream &fin, int &consecutive_blank_lines, bool &
 			{
 				html_result += "<p>\n";
 				unclosed_p_tag = true;
+			} else {
+				char last = html_result[html_result.length() - 1];
+				if(last != '.') html_result += " ";
 			}
 		}
 		html_result += md_line;
@@ -549,14 +495,14 @@ bool parse_headings_to_html(const string &md_line, string &html_result)
 	else return false;
 }
 
-bool parse_codeblock_to_html(string &md_line, string &html_result, ifstream &fin)
+bool parse_codeblock_to_html(string &md_line, string &html_result)
 {
 	if(md_line.substr(0,3) == "```")
 	{
 		string language = md_line.substr(3);
 		html_result += "<pre><code class=\"" + language + "\">";
 
-		while(getline(fin, md_line))
+		while(getline(cin, md_line))
 		{
 			if(md_line == "```") //closing backticks
 			{
@@ -579,7 +525,7 @@ bool parse_codeblock_to_html(string &md_line, string &html_result, ifstream &fin
 	return false;
 }
 
-bool parse_list_to_html(string &md_line, string &html_result, ifstream &fin)
+bool parse_list_to_html(string &md_line, string &html_result)
 {
 	if(md_line.length() < 2) //all list syntax has at least 2 chars
 		return false;
@@ -609,10 +555,10 @@ bool parse_list_to_html(string &md_line, string &html_result, ifstream &fin)
 		int curr_list_level = 0; //change to curr_nest_level
 		int indents = 0;
 
-		streampos prev_line = fin.tellg();
+		streampos prev_line = cin.tellg(); /* 2022: might be bad with cin */
 
 		//loop until md_line is no longer part of the list (doesn't start with "* " )
-		while(getline(fin, md_line))
+		while(getline(cin, md_line))
 		{
 			string trimmed_md_line = remove_leading_whitespace(md_line);
 			bool is_list = false;
@@ -639,7 +585,7 @@ bool parse_list_to_html(string &md_line, string &html_result, ifstream &fin)
 			{
 				//line is still part of the list
 
-				prev_line = fin.tellg();
+				prev_line = cin.tellg();
 
 				//create/close nested list depending on num indents in the line
 				indents = count_indents(md_line);
@@ -668,7 +614,7 @@ bool parse_list_to_html(string &md_line, string &html_result, ifstream &fin)
 			}
 			else
 			{
-				fin.seekg(prev_line); //rewind file to parse this line again, not as a list
+				cin.seekg(prev_line); //rewind file to parse this line again, not as a list
 				break;
 			}
 		}
@@ -702,7 +648,7 @@ bool parse_blockquotes_to_html(string &md_line, bool inner_blockquote)
 	else return false;
 }
 
-void parse_blockquotes_to_html(string &md_line, string &html_result, ifstream &fin)
+void parse_blockquotes_to_html(string &md_line, string &html_result)
 {
 	html_result += md_line;
 
@@ -710,10 +656,10 @@ void parse_blockquotes_to_html(string &md_line, string &html_result, ifstream &f
 	//the following reads in any consecutive blockquotes into the tag
 
 	//save position of the line so we can rewind the file back once we read too far
-	streampos prev_line = fin.tellg();
+	streampos prev_line = cin.tellg();
 
 	bool is_blockquote = true;
-	while(getline(fin, md_line) && is_blockquote)
+	while(getline(cin, md_line) && is_blockquote)
 	{
 		//blockquotes can contain markdown, so do the processing
 		parse_inline_code_to_html(md_line);
@@ -726,12 +672,12 @@ void parse_blockquotes_to_html(string &md_line, string &html_result, ifstream &f
 		if(!is_blockquote)
 		{
 			//no more blockquotes, rewind file back 1 line so it can be parsed next time
-				fin.seekg(prev_line);
+				cin.seekg(prev_line);
 		}
 		else
 		{
 			//this is another blockquote, simply append content to open <blockquote> tag
-			prev_line = fin.tellg();
+			prev_line = cin.tellg();
 			html_result += md_line;
 		}
 	}
@@ -859,28 +805,4 @@ void close_open_p_tag(string &html_result, bool &unclosed_p_tag, int consecutive
 	}
 
 	consecutive_blank_lines = 0;
-}
-
-void handle_errors(int argc, char **argv)
-{
-	if(argc != 3)
-	{
-		cout << "Usage: " << argv[0] << " input.md output.html\n";
-		exit(1);
-	}
-	int l;
-
-	string inputfn = argv[1];
-	if((l = inputfn.length()) && (l < 3 || inputfn.substr(l - 3) != ".md"))
-	{
-		std::cout << "Invalid input file type (must end in .md)\n";
-		exit(1);
-	}
-
-	string outputfn = argv[2];
-	if((l = outputfn.length()) && (l < 5 || outputfn.substr(l - 5) != ".html"))
-	{
-		std::cout << "Invalid output file type (must end in .html)\n";
-		exit(1);
-	}
 }
