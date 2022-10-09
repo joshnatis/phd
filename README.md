@@ -13,7 +13,7 @@ This tool is currently a Markdown to HTML converter and part of a static blog ge
 - decouple the blog functionality from the Markdown parsing functionality
   + corollary: allow Markdown parsing portion to be used as a header library
 - better error checking
-- tests
+- tests (pass at least most of John Gruber's [Markdown tests](http://daringfireball.net/projects/downloads/MarkdownTest_1.0.zip))
 - use less ad-hoc parsing techniques
 - become a UNIX filter program (accept from stdin, write to stdout)
 
